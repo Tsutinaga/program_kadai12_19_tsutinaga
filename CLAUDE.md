@@ -1,113 +1,113 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+このファイルは、このリポジトリでコードを扱う際にClaude Code (claude.ai/code)にガイダンスを提供します。
 
-## Project Overview
+## プロジェクト概要
 
-This is a Unity 6000.0.41f1 project implementing a 3D wave-based survival shooter game where the player faces waves of enemies with an auto-targeting weapon system.
+これはUnity 6000.0.41f1プロジェクトで、プレイヤーが自動照準武器システムでウェーブごとの敵に立ち向かう3Dウェーブベースのサバイバルシューティングゲームを実装しています。
 
-## Unity Development Commands
+## Unity開発コマンド
 
-### Opening the Project
-- Open this project folder in Unity Hub with Unity 6000.0.41f1
-- The main scene is located at: `Assets/Scenes/SampleScene.unity`
+### プロジェクトを開く
+- Unity Hub でUnity 6000.0.41f1を使用してこのプロジェクトフォルダを開く
+- メインシーンの場所: `Assets/Scenes/SampleScene.unity`
 
-### Testing
-- Run tests via Unity Test Runner: Window → General → Test Runner
-- Play mode testing: Enter Play Mode in Unity Editor (Ctrl/Cmd + P)
+### テスト
+- Unity Test Runnerでテストを実行: Window → General → Test Runner
+- プレイモードテスト: Unityエディタでプレイモードに入る (Ctrl/Cmd + P)
 
-### Building
-- Build via File → Build Settings
-- Supported platforms configured in ProjectSettings/EditorBuildSettings.asset
+### ビルド
+- File → Build Settings からビルド
+- サポートされているプラットフォームは ProjectSettings/EditorBuildSettings.asset で設定
 
-## Code Architecture
+## コードアーキテクチャ
 
-### Singleton Manager Pattern
-The project uses singleton managers for global state management:
-- **GameManager** (`Assets/scripts/GameManager.cs`): Central game state controller
-  - Manages game over/clear conditions
-  - Pauses game by setting `Time.timeScale = 0f`
-  - Singleton accessible via `GameManager.Instance`
-- **UIManager** (`Assets/scripts/UiManager.cs`): UI state management
-  - Handles HP display, wave counter, and game end screens
-  - Singleton accessible via `UIManager.Instance`
+### シングルトンマネージャーパターン
+プロジェクトはグローバルな状態管理にシングルトンマネージャーを使用:
+- **GameManager** (`Assets/scripts/GameManager.cs`): ゲーム状態の中央コントローラー
+  - ゲームオーバー/クリア条件を管理
+  - `Time.timeScale = 0f` でゲームを一時停止
+  - `GameManager.Instance` でシングルトンにアクセス
+- **UIManager** (`Assets/scripts/UiManager.cs`): UI状態管理
+  - HP表示、ウェーブカウンター、ゲーム終了画面を処理
+  - `UIManager.Instance` でシングルトンにアクセス
 
-### Core Game Systems
+### コアゲームシステム
 
-#### Player System
+#### プレイヤーシステム
 - **PlayerController** (`Assets/scripts/playercontroller.cs`):
-  - Movement via Input.GetAxis (Horizontal/Vertical)
-  - HP management with damage flash effect
-  - Collision-based damage from enemies (10 damage per collision)
-  - Triggers GameOver when HP ≤ 0
+  - Input.GetAxis (Horizontal/Vertical) による移動
+  - ダメージフラッシュエフェクト付きのHP管理
+  - 敵との衝突ベースのダメージ (衝突ごとに10ダメージ)
+  - HP ≤ 0でGameOverをトリガー
 
-#### Weapon System
+#### 武器システム
 - **WeaponSystem** (`Assets/scripts/WeaponSystems.cs`):
-  - Auto-fires at nearest enemy based on fireRate
-  - Uses GameObject.FindGameObjectsWithTag("Enemy") to find targets
-  - Instantiates bullets with direction and speed
+  - fireRateに基づいて最も近い敵に自動発射
+  - GameObject.FindGameObjectsWithTag("Enemy")でターゲットを検索
+  - 方向と速度を持つ弾丸をインスタンス化
 - **Bullet** (`Assets/scripts/Bullet.cs`):
-  - Linear movement with 5-second lifetime
-  - Trigger-based collision with enemies (25 damage)
-  - Self-destructs on impact
+  - 5秒間のライフタイムを持つ直線移動
+  - 敵とのトリガーベースの衝突 (25ダメージ)
+  - 衝突時に自己破壊
 
-#### Enemy System
+#### 敵システム
 - **Enemy** (`Assets/scripts/Enemy.cs`):
-  - Chases player using normalized direction vector
-  - HP-based health with damage flash feedback
-  - Smooth shrink animation on death via coroutine
-  - Uses Player tag to find target
+  - 正規化された方向ベクトルを使用してプレイヤーを追跡
+  - ダメージフラッシュフィードバック付きのHPベースの体力
+  - コルーチンによる死亡時のスムーズな縮小アニメーション
+  - Playerタグを使用してターゲットを検索
 - **EnemySpawner** (`Assets/scripts/EnemySpawner.cs`):
-  - Wave-based spawning (configurable enemies per wave and total waves)
-  - Spawns enemies in random positions within spawnRadius
-  - Automatically progresses to next wave when all enemies defeated
-  - Triggers GameClear after final wave
+  - ウェーブベースのスポーン (ウェーブごとの敵数と総ウェーブ数が設定可能)
+  - spawnRadius内のランダムな位置に敵をスポーン
+  - すべての敵が倒されると自動的に次のウェーブに進行
+  - 最終ウェーブ後にGameClearをトリガー
 
-#### Camera System
+#### カメラシステム
 - **CameraFollow** (`Assets/scripts/CameraFollow.cs`):
-  - Smooth camera following with configurable offset
-  - Fixed rotation at 45° angles for isometric view
-  - Uses LateUpdate for smooth follow
+  - 設定可能なオフセットでスムーズなカメラフォロー
+  - アイソメトリックビュー用の45°角度での固定回転
+  - スムーズなフォローのためにLateUpdateを使用
 
-### Unity Packages
-Key dependencies (see `Packages/manifest.json`):
-- `com.unity.inputsystem` (1.13.1): New Input System for player controls
-- `com.unity.render-pipelines.universal` (17.0.4): URP for rendering
-- `com.unity.ugui` (2.0.0): UI system
-- TextMesh Pro: Text rendering (included assets in `Assets/TextMesh Pro/`)
+### Unityパッケージ
+主要な依存関係 (`Packages/manifest.json`を参照):
+- `com.unity.inputsystem` (1.13.1): プレイヤーコントロール用の新しいInput System
+- `com.unity.render-pipelines.universal` (17.0.4): レンダリング用のURP
+- `com.unity.ugui` (2.0.0): UIシステム
+- TextMesh Pro: テキストレンダリング (`Assets/TextMesh Pro/`にアセットを含む)
 
 ### Prefabs
-- `Assets/Prefabs/Enemy.prefab`: Enemy game object
-- `Assets/Prefabs/Bullet.prefab`: Bullet projectile
+- `Assets/Prefabs/Enemy.prefab`: 敵のゲームオブジェクト
+- `Assets/Prefabs/Bullet.prefab`: 弾丸の発射体
 
-### Tags Required
-The game relies on Unity tags:
-- `Player`: For player identification
-- `Enemy`: For enemy identification and targeting
+### 必要なタグ
+ゲームはUnityタグに依存:
+- `Player`: プレイヤーの識別用
+- `Enemy`: 敵の識別とターゲティング用
 
-### Scene Structure
-The main scene (`Assets/Scenes/SampleScene.unity`) should contain:
-- Player object with PlayerController and WeaponSystem
-- GameManager object with GameManager component
-- UIManager object with UIManager component and UI references
-- EnemySpawner object with EnemySpawner component
-- Camera with CameraFollow component
+### シーン構造
+メインシーン (`Assets/Scenes/SampleScene.unity`) には以下が含まれている必要があります:
+- PlayerControllerとWeaponSystemを持つPlayerオブジェクト
+- GameManagerコンポーネントを持つGameManagerオブジェクト
+- UIManagerコンポーネントとUI参照を持つUIManagerオブジェクト
+- EnemySpawnerコンポーネントを持つEnemySpawnerオブジェクト
+- CameraFollowコンポーネントを持つCamera
 
-## Code Conventions
+## コード規約
 
-### Naming
-- C# scripts use PascalCase for class names (e.g., `GameManager`)
-- One exception: `playercontroller.cs` (lowercase filename, but class is `PlayerController`)
-- Public fields exposed in Inspector use camelCase with descriptive names
+### 命名規則
+- C#スクリプトはクラス名にPascalCaseを使用 (例: `GameManager`)
+- 1つの例外: `playercontroller.cs` (ファイル名は小文字だが、クラスは`PlayerController`)
+- Inspectorに公開されるpublicフィールドは説明的な名前のcamelCaseを使用
 
-### Design Patterns
-- Singleton pattern for managers with null-check in Awake()
-- Component-based architecture following Unity conventions
-- Coroutines for animations (e.g., enemy death shrink effect)
-- Material color manipulation for visual feedback (damage flashes)
+### デザインパターン
+- Awake()でnullチェックを行うマネージャー用のシングルトンパターン
+- Unityの規約に従ったコンポーネントベースのアーキテクチャ
+- アニメーション用のコルーチン (例: 敵の死亡時の縮小エフェクト)
+- 視覚的フィードバック用のマテリアル色操作 (ダメージフラッシュ)
 
-### Communication Between Systems
-- Managers communicate via singleton pattern: `ManagerName.Instance?.MethodCall()`
-- Null-conditional operator (`?.`) used to prevent null reference errors
-- GameObject.FindGameObjectsWithTag() for runtime object queries
-- GetComponent<>() for component access
+### システム間の通信
+- マネージャーはシングルトンパターンで通信: `ManagerName.Instance?.MethodCall()`
+- nullリファレンスエラーを防ぐためにnull条件演算子 (`?.`) を使用
+- ランタイムオブジェクトクエリにはGameObject.FindGameObjectsWithTag()を使用
+- コンポーネントアクセスにはGetComponent<>()を使用
