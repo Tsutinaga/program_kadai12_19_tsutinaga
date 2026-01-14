@@ -4,6 +4,10 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 5f;
+    public float stoppingDistance = 0.1f;
+
+    private Vector3 targetPosition;
+    private bool isMoving = false;
 
     [Header("HP")]
     public float maxHP = 100f;
@@ -26,13 +30,37 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        // �ړ�
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-        Vector3 move = new Vector3(h, 0, v) * moveSpeed * Time.deltaTime;
-        transform.position += move;
+        // 右クリックで移動先を設定
+        if (Input.GetMouseButtonDown(1))
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
 
-        // �_���[�W�G�t�F�N�g�̃^�C�}�[
+            if (Physics.Raycast(ray, out hit))
+            {
+                targetPosition = hit.point;
+                targetPosition.y = transform.position.y; // Y軸は現在の高さを維持
+                isMoving = true;
+            }
+        }
+
+        // 目標位置に向かって移動
+        if (isMoving)
+        {
+            Vector3 direction = (targetPosition - transform.position).normalized;
+            float distance = Vector3.Distance(transform.position, targetPosition);
+
+            if (distance > stoppingDistance)
+            {
+                transform.position += direction * moveSpeed * Time.deltaTime;
+            }
+            else
+            {
+                isMoving = false;
+            }
+        }
+
+        // ダメージエフェクトのタイマー
         if (damageTimer > 0)
         {
             damageTimer -= Time.deltaTime;
@@ -56,7 +84,7 @@ public class PlayerController : MonoBehaviour
         currentHP -= damage;
         UIManager.Instance?.UpdateHP(currentHP, maxHP);
 
-        // �_���[�W���̐F�ω�
+        // �_���[�W���̐F�ω�
         if (playerMaterial != null)
         {
             playerMaterial.color = Color.red;
